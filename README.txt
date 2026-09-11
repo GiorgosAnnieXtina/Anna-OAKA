@@ -1,0 +1,1 @@
+Mobile-first song app generated from the DATABASE sheet. The homepage uses the image from ΟΔΗΓΙΕΣ!B10. Song text is taken from DATABASE columns A, B, C, E, F and G exactly as supplied. Interface language: English. Font: Josefin Sans.

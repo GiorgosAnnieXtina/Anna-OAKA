@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#000000"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><link rel="manifest" href="./manifest.webmanifest">
+<title>Song Library</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root { font-family:"Josefin Sans",sans-serif; color-scheme:dark; background:#000; }
+* { box-sizing:border-box; }
+html,body { margin:0; min-height:100%; background:#000; color:#fff; font-family:"Josefin Sans",sans-serif; }
+button,input,select { font:inherit; }
+.screen { min-height:100svh; background:#000; }
+.home {
+  min-height:100svh; position:relative; display:flex; align-items:flex-end;
+  padding:24px 18px calc(22px + env(safe-area-inset-bottom));
+  background-image:linear-gradient(to top,rgba(0,0,0,.78),rgba(0,0,0,.05) 58%),url("homepage-bg.png");
+  background-size:cover; background-position:center;
+}
+.controls { width:100%; display:grid; gap:10px; }
+.search {
+  width:100%; border:1px solid rgba(255,255,255,.3); border-radius:12px;
+  background:rgba(0,0,0,.65); color:#fff; padding:14px 16px; outline:none;
+  backdrop-filter:blur(8px);
+}
+.search::placeholder { color:rgba(255,255,255,.75); }
+.select {
+  width:100%; border:1px solid rgba(255,255,255,.3); border-radius:12px;
+  background:rgba(0,0,0,.78); color:#fff; padding:14px 16px; outline:none;
+}
+.song { min-height:100svh; padding:28px 18px 38px; background:#000; }
+.topbar { display:flex; align-items:center; gap:12px; margin-bottom:28px; }
+.back {
+  border:0; background:#fff; color:#000; border-radius:999px; width:42px; height:42px;
+  font-size:22px; cursor:pointer;
+}
+.heading { margin:0; font-size:clamp(22px,6vw,34px); line-height:1.15; font-weight:600; }
+.lyrics {
+  display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px;
+  align-items:start;
+}
+.panel {
+  min-width:0; padding:18px 14px; border:1px solid rgba(255,255,255,.14);
+  border-radius:14px; background:#080808;
+}
+.panel h2 { margin:0 0 16px; font-size:15px; font-weight:600; opacity:.75; text-transform:uppercase; letter-spacing:.08em; }
+.text { white-space:pre-wrap; font-size:clamp(17px,4.5vw,22px); line-height:1.55; }
+.video { margin-top:22px; }
+.video a { color:#fff; }
+.video iframe { width:100%; aspect-ratio:16/9; border:0; border-radius:14px; background:#111; }
+.empty { opacity:.6; text-align:center; padding:24px; }
+@media (max-width:640px) {
+  .lyrics { grid-template-columns:1fr 1fr; gap:8px; }
+  .panel { padding:14px 10px; }
+  .text { font-size:15px; line-height:1.5; }
+}
+</style>
+</head>
+<body>
+<div id="app" class="screen"></div><button id="installBtn" style="display:none;position:fixed;right:16px;bottom:16px;z-index:20;border:0;border-radius:999px;padding:12px 16px;background:#fff;color:#000;font-family:inherit;font-weight:600;">Add to Home Screen</button>
+<script>
+const songs = [{"title": "Στην Πυρά ", "translit": "Stin Pira", "portuguese_title": "Pra fogueira", "translit_lyrics": "Boris apopse na vgis \nm' oles tis tsoules tis gis\n\nVges brosta dynata \ngia neous erotes\n\nNa vris koritsia sosta \ngia na hari ki i mama\n\nStin pyra, stin pyra \nme tis ksenerotes", "portuguese_lyrics": "Pode sair esta noite \ncom todas as piranhas da Terra\n\nSaia com tudo, com força, \natrás de novos amores\n\nEncontre garotas certinhas \npara fazer a mamãe feliz\n\nPra fogueira, pra fogueira \ncom as bobocas!", "video": "https://youtu.be/ecIphyKtQl0?si=M-w9NkKYZmjBwDfj "}, {"title": "Αγάπη υπερβολική ", "translit": "Agapi ypervoliki", "portuguese_title": "Amor exagerado", "translit_lyrics": "Apo agapi ypervoliki\nTha pethano\n\nDen boro makria sou oute stigmi\nTi na kano\n\nArostia mou, arostia mou\ngyrna piso\n\nDe ginete, de ginete\nna se misiso", "portuguese_lyrics": "Por amor exagerado\nVou morrer\n\nNão consigo ficar longe de você nem por um momento\nO que eu faço?\n\nMinha doença, minha doença\nVolta para mim\n\nNão dá, não dá\nPara te odiar", "video": "https://youtu.be/o3rr-e_QIow?si=G4X8f8-MbvpZdI3L "}, {"title": "Είσαι ", "translit": "Ise", "portuguese_title": "Você está", "translit_lyrics": "Ise, sto ema, stis fleves, \nsta kitara mou,\nIse, ston aera, pou anapneo, \nsti monaksia mou,\n\nEsi, ti zoi mou orizis,\nEsi, to mialo mou trelenis,\nEsi, se ola iparhis, \nesi, ki as min ise edo.", "portuguese_lyrics": "Você está no sangue, nas veias\nNas minhas células\nVocê está no ar que eu respiro\nNa minha solidão\n\nVocê comanda a minha vida\nVocê enlouquece a minha mente\nVocê existe em tudo\nVocê, mesmo não estando aqui", "video": "https://youtu.be/gPbMLhwgJN0?si=MFehP80LbkcE6lKd "}, {"title": "Σεντόνια", "translit": "Sentonia", "portuguese_title": "Lençóis", "translit_lyrics": "Tora keo tin kardia mou\nKeo kai ta dakria moy\nKai ksorkizo deka hronia\nSta kenourgia mou sentonia\n\nStachti kano tin kardia mou\nStachti kai ta onira mou\nKai ksorkizo deka hronia\nSta kenourgia mou sentonia", "portuguese_lyrics": "Agora estou queimando meu coração\nQueimando também as minhas lágrimas\nE exorcizando dez anos\nNos meus lençóis novos\n\nFaço cinzas do meu coração\nCinzas também dos meus sonhos\nE exorcizando dez anos\nNos meus lençóis novos", "video": "https://youtu.be/r-b6axWgZzg?si=EiNZvQbctZRsyZXv "}, {"title": "Λεκές ", "translit": "Lekes", "portuguese_title": "Μancha", "translit_lyrics": "Posa Savata ke Kyriakes\nliono stis kardia tis fylakes\nKe olo trivo kai matono\nma de vgeni tou erota sou o lekes\n\nPosa Savvata ke Kyriakes\nkathome ke kleo tis vradies\nMa osa dakrya ki an treksoune\nDe vgeni o lekes\n\nTha me pethanis to ha pi\nTha me pethanis to ha di\nTha me pethanis ki o lekes tha ine eki", "portuguese_lyrics": "Quantos sábados e domingos\nEstou definhando na prisão do coração\nE fico esfregando até sangrar\nMas a mancha do seu amor não sai\n\nQuantos sábados e domingos\nFico chorando pelas noites\nMas por mais lágrimas que corram\nA mancha não sai\n\nVocê vai me matar, eu já tinha dito\nVocê vai me matar, eu já tinha visto\nVocê vai me matar, e a mancha vai continuar ali", "video": "https://youtu.be/5MUcHW0-_Qw?si=U_KpJgFbuOGBbnK-"}, {"title": "Εξαίρεση ", "translit": "Ekseresi", "portuguese_title": "Exceção", "translit_lyrics": "Den thelo na me lypitheis\nPseftika logia na mou peis\nTa sihenomai ola afta\nSou milao besa\n\nDen thelo gia parigoria\nMia teleftea ankalia\nAllo thelo na sou po\nSou milao besa\n\nNe, ise i exeresi\nNe, ise i exeresi\nI zoi mou oli ena arostimeno ego\nKi ola t' alla mia mikri ypodieresi", "portuguese_lyrics": "Não quero que você tenha pena de mim\nQue me diga palavras falsas\nEu odeio tudo isso\nEstou te falando a real\n\nNão quero como consolo\nUm último abraço\nQuero te dizer outra coisa\nEstou te falando a real\n\nSim, você é a exceção\nSim, você é a exceção\nToda a minha vida é um ego doentio\nE todo o resto, uma pequena fração", "video": "https://youtu.be/o-ldt4tIdbo?si=YSpwdmEBEEHpvj7b "}, {"title": "Σε περίπτωση που", "translit": "Se periptosi pou", "portuguese_title": "Caso você...", "translit_lyrics": "Piso ap' tin glastra me to giasemi\nKsereis pou\nTha 'ne eki ta klidia tou spitiou\nSe periptosi pou\n\nThelis kaana na 'rthis\nKi ehi papsi i kardia sou na htypai allou\nMin to skeftis, min drapis\nOti ki an hreiastis\nO,ti ki an sou symvi\nNa thymasai kala ta klidia tou spitiou\nTha 'ne panta eki\nSe periptosi pou", "portuguese_lyrics": "Atrás do vaso de jasmim\nVocê sabe onde\nAs chaves da casa vão estar lá\nCaso você...\n\nQueira voltar de novo\nE seu coração tenha parado de bater em outro lugar\nNão pense duas vezes, não tenha vergonha\nO que quer que você precise\nO que quer que te aconteça\nLembre-se bem, as chaves da casa\nSempre vão estar lá\nCaso você...", "video": "https://youtu.be/SLcY0ntEvJs?si=Ym1rMIzBV1FjemTE"}, {"title": "Αιγαίο", "translit": "Aegeo", "portuguese_title": "Egeu", "translit_lyrics": "Pires ton anemo\nPires ta kymata\nAp' to Aegeo\nM' afises se ena domatio nekri \nna anapneo\n\nPires ton anemo\nPires ta kymata\nAp' to Aegeo\nM' afises mono dyo matia stegna\nGia na kleo\n\nStoma dichos milia\nMia kardia pou htypa\nMihanika", "portuguese_lyrics": "Levou o vento\nLevou as ondas\nDo Egeu\nMe deixou morta em um quarto\nApenas respirando\n\nLevou o vento\nLevou as ondas\nDo Egeu\nMe deixou só dois olhos secos\nPara chorar\n\nBoca sem palavras\nUm coração que bate\nMecanicamente", "video": "https://youtu.be/6t2rprjYqAI?si=T6g99yiIx94nbZaE "}, {"title": "Δώδεκα ", "translit": "Dodeka", "portuguese_title": "Doze horas (Meia-noite)", "translit_lyrics": "Dodeka\nKi oute ena tilefonima\nTon arithmo tis monaκσias mou de htypas\nKe megaloni i apostasi gia mas\n\nKe de htypai to tilefono,\nme pnigi to parapono\npou den katalaves pote sou ti perno\nki an ehi gini i agonia mou vouno\n\nDodeka,\ni elpida mou kremastike\ns' ena tilefono pou emine nekro\nke tin kardia mou pou fonazi s' agapo\nDodeka", "portuguese_lyrics": "Doze horas\nE nem uma ligação\nVocê não disca o número da minha solidão\nE a distância cresce entre nós\n\nE o telefone não toca\nO rancor me sufoca\nPorque você nunca entendeu o que eu passo\nE a minha agonia virou uma montanha\n\nDoze horas\nMinha esperança se enforcou\nEm um telefone que ficou mudo\nE no meu coração que grita \"eu te amo\"\nDoze horas", "video": "https://youtu.be/xwOR8Vw8mvc?si=xzs__AM-CX2w-m9m "}, {"title": "Εχω πεθάνει για σένα ", "translit": "Eho pethani gia sena", "portuguese_title": "Estou morta por você", "translit_lyrics": "Makriá sou dhen zo\nYia séna katastréfo\nTon organismó mou\nPíno na zalistó\nMa sto mialó mou\nÍse páli esí moró mou\n\nMakriá sou dhe zo\nM' ékhis dhialísi\nKháli m' ékhis katandísi\nTon efiálti mou zo\nKi argopethaíno tóra\nPou ékhoume khorísi", "portuguese_lyrics": "Longe de você eu não vivo\nPor você eu destruo\nO meu organismo\nBebo para ficar tonta\nMas na minha mente\nÉ você de novo, meu amor\n\nLonge de você eu não vivo\nVocê me destruiu\nMe deixou num estado lamentável\nEstou vivendo o meu pesadelo\nE morrendo aos poucos agora\nQue estamos separados", "video": "https://youtu.be/iE6kXEuiOxY?si=dG1xRGE44aXluH3Z "}, {"title": "Τα μαθητικά τα χρόνια ", "translit": "Ta mathitika ta hronia", "portuguese_title": "Os anos de escola", "translit_lyrics": "Ma egó tha édhina ta pánda na yinómouna\npáli paidhí lígo na vriskómouna\nstis ídhies táxis sta ídhia thranía\nme tous simmathités mou na káno astía\nkai tous kathiyités pou koitázoun kakhípopta\nta mathitiká ta khrónia dhen t’ allázo me típota", "portuguese_lyrics": "Mas eu daria tudo para ser\nCriança de novo, para estar um pouco\nNas mesmas salas, nas mesmas carteiras\nFazendo piadas com os meus colegas de classe\nE os professores olhando desconfiados\nOs anos de escola eu não troco por nada", "video": "https://youtu.be/qu3nDL9bsic?si=KgYtzvtrq5f3n6io"}, {"title": "Αντίστροφη μέτρηση ", "translit": "Adistrofi metrisi", "portuguese_title": "Contagem regressiva", "translit_lyrics": "Ηéi! se sénane miláo \nΗéi! se séna p’ agapáo\nΗéi! i flóga pái na svísi \nki i andístrofi métrisi ékhi arkhísi", "portuguese_lyrics": "Ei! É com você que eu estou falando\nEi! É você que eu amo\nEi! A chama está prestes a se apagar\nE a contagem regressiva já começou", "video": "https://youtu.be/4pH5nG6y1sI?si=pP6wt-WuzPuiOfn7 "}, {"title": "Ατμόσφαιρα ηλεκτρισμένη ", "translit": "Atmosfera ilektrismeni", "portuguese_title": "Atmosfera eletrizada", "translit_lyrics": "Kai se koitázo, kai me koitázeis\nKai s’ ankaliázo kai m’ ankaliázeis\n \nI atmósfaira ilektrisméni\nLéxi apo ta heíli mas den vgaínei\nI siopí ta léei apópse óla\nTi na peís kai ti na pó\n\nAmihanía, amihanía\nNa m’ agapás, na s’ agapó", "portuguese_lyrics": "E eu te olho, e você me olha\nE eu te abraço, e você me abraça!\n\nA atmosfera está eletrizada\nNenhuma palavra sai dos nossos lábios\nO silêncio diz tudo esta noite\nO que você vai dizer e o que eu vou dizer?\n\nConstrangimento... Constrangimento...\nVocê me amando, eu te amando!", "video": "https://youtu.be/uXDvyyQthSE?si=c_e4555-L9vrg3VS "}, {"title": "Κακά παιδιά ", "translit": "Kaka pedia", "portuguese_title": "Caras errados", "translit_lyrics": "Páli sta khaména tha yirnáo,\nme kaká paidhiá tha xenikhtáo.\nTis kakés siníthies tha arkhíso\napó to mialó yia na se svíso! \n\nPáli sta khaména tha yirnáo,\nme kaká paidhiá tha xenikhtáo.\nTis kakés siníthies tha arkhíso\nna se lismoníso", "portuguese_lyrics": "De novo vou andar sem rumo por aí\nVou passar a noite em claro com os caras errados\nVou começar com os maus hábitos\nPara te apagar da minha mente!\n\nDe novo vou andar sem rumo por aí\nVou passar a noite em claro com os caras errados\nVou começar com os maus hábitos\nPara te esquecer", "video": "https://youtu.be/w2wRq1UiKh4?si=-gr5LEfLj4ceBLDE "}, {"title": "Ο τελευταίος χορός ", "translit": "O teleftaios horos", "portuguese_title": "A última dança", "translit_lyrics": "Se mia ora tha houn ola teleiosei\nPoso grigora pernaei o kairos\nAs pethainame agkalia prin teleiosei\nO teleftaios horos\nO teleftaios horos", "portuguese_lyrics": "Em uma hora tudo terá terminado\nComo o tempo passa rápido\nQuem me dera morrermos abraçados antes que termine\nA última dança\nA última dança", "video": ""}, {"title": "Για ένα λεπτό ", "translit": "Gia ena lepto", "portuguese_title": "Por um minuto", "translit_lyrics": "Gia ena lepto\nThelo na fygoume se kapoio asteri\nEna lepto\nAfta pou xeroume, kaneis de xerei\nNa borousa na 'moun thalassa ego\nSti Thessaloniki na 'rtho na se vro", "portuguese_lyrics": "Por um minuto\nQuero que a gente fuja para alguma estrela\nUm minuto\nO que nós sabemos, ninguém mais sabe\nQuem me dera eu pudesse ser o mar\nPara ir até Tessalônica te encontrar", "video": ""}, {"title": "Όλα για όλα ", "translit": "Ola yia ola", "portuguese_title": "Tudo ou nada", "translit_lyrics": "Óla yia óla moró mou\nÓla yia óla\nEkí pou vgaínoune\nTou ínai mas ta arómata\n\nÓla yia óla moró mou\nÓla yia óla\nÓli i zoí mou\nSpasména kinglidhómata", "portuguese_lyrics": "Tudo ou nada, meu bem\nTudo ou nada\nOnde exalam \nOs aromas do nosso ser\n\nTudo ou nada, meu bem\nTudo ou nada\nToda a minha vida\nSão grades retorcidas", "video": ""}, {"title": "Δεν είναι ψέμα ", "translit": "Den einai psema", "portuguese_title": "Não é mentira", "translit_lyrics": "Den einai, den einai, den einai psema\nDen einai, den einai, den einai psema \n\nMono esy gemizeis to keno\nMono esy gemizeis to keno\n\nSto myalo mou, stin psychi mou, sto zenith kai sto nadir mou\nSto myalo mou, stin psychi mou, kai sto kefi to tsakir mou", "portuguese_lyrics": "Não é, não é, não é mentira\nNão é, não é, não é mentira\n\nSó você preenche o vazio\nSó você preenche o vazio\n\nNa minha mente, na minha alma, no meu ápice e no meu abismo\nNa minha mente, na minha alma, e na minha alegria mais louca", "video": ""}, {"title": "Τρένο", "translit": "Treno", "portuguese_title": "O trem", "translit_lyrics": "Ki ithela tosa na sou po\nPos s'agapo na sou fonakso\nAh, na borousa mia zoi\nse mia stigmi na tin allakso\n\nKi egrapsa to s'agapo sto tzami\nKi molis eida pou dakrises,\nEtrehe to darki mou potami\nGiati kardia mou argises", "portuguese_lyrics": "E eu queria tanto te dizer\nGritar para você que eu te amo,\nAh, se eu pudesse uma vida inteira\nEm um só momento mudar\n\nE escrevi o \"te amo\" no vidro\nE assim que vi que você lacrimejou,\nMinha lágrima correu como um rio\nPorque, meu amor, você demorou.", "video": "https://youtu.be/q25eeb9YyNY?si=9AV_kxwS9xq_WVTt "}];
+
+const app = document.getElementById("app");
+
+function youtubeId(url) {
+  if (!url) return "";
+  const m = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/))([^?&/]+)/i);
+  return m ? m[1] : "";
+}
+
+function home(filtered=songs, query="") {
+  app.innerHTML = `
+    <main class="home">
+      <div class="controls">
+        <input id="search" class="search" type="search" placeholder="Search songs..." value="${escapeAttr(query)}">
+        <select id="songSelect" class="select">
+          <option value="">Select a song</option>
+          ${filtered.map((s,i)=>`<option value="${songs.indexOf(s)}">${escapeHtml(s.title.trim())}</option>`).join("")}
+        </select>
+      </div>
+    </main>`;
+  const search = document.getElementById("search");
+  const select = document.getElementById("songSelect");
+  search.addEventListener("input", () => {
+    const q = search.value.toLowerCase().trim();
+    const f = songs.filter(s => [s.title,s.translit,s.portuguese_title].some(v => v.toLowerCase().includes(q)));
+    home(f, search.value);
+    document.getElementById("search").focus();
+    document.getElementById("search").setSelectionRange(q.length,q.length);
+  });
+  select.addEventListener("change", () => {
+    if (select.value !== "") showSong(Number(select.value));
+  });
+}
+
+function showSong(index) {
+  const s = songs[index];
+  const id = youtubeId(s.video);
+  app.innerHTML = `
+    <main class="song">
+      <div class="topbar">
+        <button class="back" aria-label="Back">‹</button>
+        <h1 class="heading">${escapeHtml(s.title.trim())} — ${escapeHtml(s.translit.trim())} (${escapeHtml(s.portuguese_title.trim())})</h1>
+      </div>
+      <section class="lyrics">
+        <article class="panel">
+          <h2>Transcription</h2>
+          <div class="text">${escapeHtml(s.translit_lyrics)}</div>
+        </article>
+        <article class="panel">
+          <h2>Portuguese</h2>
+          <div class="text">${escapeHtml(s.portuguese_lyrics)}</div>
+        </article>
+      </section>
+      ${id ? `<div class="video"><iframe src="https://www.youtube.com/embed/${encodeURIComponent(id)}" title="YouTube video" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></div>` : ""}
+    </main>`;
+  app.querySelector(".back").addEventListener("click", home);
+}
+
+function escapeHtml(v) {
+  return String(v).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+function escapeAttr(v) { return escapeHtml(v); }
+
+home();
+
+let deferredInstallPrompt = null;
+const installBtn = document.getElementById("installBtn");
+window.addEventListener("beforeinstallprompt", e => {
+  e.preventDefault();
+  deferredInstallPrompt = e;
+  installBtn.style.display = "block";
+});
+installBtn.addEventListener("click", async () => {
+  if (!deferredInstallPrompt) return;
+  deferredInstallPrompt.prompt();
+  await deferredInstallPrompt.userChoice;
+  deferredInstallPrompt = null;
+  installBtn.style.display = "none";
+});
+window.addEventListener("appinstalled", () => {
+  installBtn.style.display = "none";
+});
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js"));
+}
+</script>
+</body>
+</html>
