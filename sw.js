@@ -1,4 +1,4 @@
-const CACHE = "song-library-v2";
+const CACHE = "song-library-v3";
 const ASSETS = ["./", "./index.html", "./manifest.webmanifest", "./homepage-bg.png"];
 
 self.addEventListener("install", event => {

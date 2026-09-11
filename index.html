@@ -56,10 +56,47 @@ button,input,select { font:inherit; }
   .panel { padding:14px 10px; }
   .text { font-size:15px; line-height:1.5; }
 }
-</style>
+
+.admin-gear{
+ position:fixed; top:calc(12px + env(safe-area-inset-top)); right:12px; z-index:9999;
+ width:48px;height:48px;border:1px solid rgba(255,255,255,.35);border-radius:50%;
+ background:rgba(0,0,0,.78);color:#fff;font-size:24px;display:flex;align-items:center;
+ justify-content:center;cursor:pointer;box-shadow:0 4px 18px rgba(0,0,0,.45);
+}
+.admin-overlay{position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,.88);display:none;
+ overflow:auto;padding:24px 16px calc(24px + env(safe-area-inset-bottom));}
+.admin-card{max-width:560px;margin:30px auto 0;background:#111;border:1px solid #333;border-radius:18px;padding:20px;}
+.admin-card h2{margin:0 0 18px;font-size:24px}
+.admin-card label{display:block;margin:12px 0 6px;opacity:.8;font-size:14px}
+.admin-card input,.admin-card textarea{width:100%;border:1px solid #444;border-radius:10px;background:#050505;color:#fff;padding:12px;font:inherit}
+.admin-card textarea{min-height:110px;resize:vertical}
+.admin-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
+.admin-actions button{border:0;border-radius:10px;padding:13px;font:inherit;font-weight:600;cursor:pointer}
+.admin-close{background:#333;color:#fff}.admin-save{background:#fff;color:#000}
+.admin-download{width:100%;margin-top:10px;background:#fff;color:#000}
+.admin-msg{min-height:22px;margin-top:12px;font-size:14px}
+
 </head>
 <body>
-<div id="app" class="screen"></div><button id="installBtn" style="display:none;position:fixed;right:16px;bottom:16px;z-index:20;border:0;border-radius:999px;padding:12px 16px;background:#fff;color:#000;font-family:inherit;font-weight:600;">Add to Home Screen</button>
+<div id="app" class="screen"></div>
+<button id="adminGear" class="admin-gear" type="button" aria-label="Add song" title="Add song">⚙️</button>
+<div id="adminOverlay" class="admin-overlay" aria-hidden="true">
+ <div class="admin-card">
+  <h2>Add song</h2>
+  <label>Title</label><input id="aTitle" type="text" autocomplete="off">
+  <label>Transliteration</label><input id="aTranslit" type="text" autocomplete="off">
+  <label>Portuguese title</label><input id="aPtTitle" type="text" autocomplete="off">
+  <label>Transliterated lyrics</label><textarea id="aLyrics"></textarea>
+  <label>Portuguese lyrics</label><textarea id="aPtLyrics"></textarea>
+  <label>YouTube URL</label><input id="aVideo" type="url" placeholder="https://www.youtube.com/watch?v=...">
+  <div class="admin-actions">
+   <button id="aClose" class="admin-close" type="button">Close</button>
+   <button id="aSave" class="admin-save" type="button">Add song</button>
+  </div>
+  <button id="aDownload" class="admin-download" type="button">Download updated songs.json</button>
+  <div id="aMsg" class="admin-msg"></div>
+ </div>
+</div><button id="installBtn" style="display:none;position:fixed;right:16px;bottom:16px;z-index:20;border:0;border-radius:999px;padding:12px 16px;background:#fff;color:#000;font-family:inherit;font-weight:600;">Add to Home Screen</button>
 <script>
 let songs = [];
 const app = document.getElementById("app");
@@ -124,9 +161,46 @@ function escapeHtml(v) {
 }
 function escapeAttr(v) { return escapeHtml(v); }
 
+
+const adminGear = document.getElementById("adminGear");
+const adminOverlay = document.getElementById("adminOverlay");
+const aMsg = document.getElementById("aMsg");
+function openAdmin(){
+  adminOverlay.style.display="block"; adminOverlay.setAttribute("aria-hidden","false");
+  document.body.style.overflow="hidden"; document.getElementById("aTitle").focus();
+}
+function closeAdmin(){
+  adminOverlay.style.display="none"; adminOverlay.setAttribute("aria-hidden","true");
+  document.body.style.overflow="";
+}
+adminGear.addEventListener("click", openAdmin);
+document.getElementById("aClose").addEventListener("click", closeAdmin);
+adminOverlay.addEventListener("click", e => { if(e.target===adminOverlay) closeAdmin(); });
+document.getElementById("aSave").addEventListener("click", () => {
+  const s = {
+    title: document.getElementById("aTitle").value.trim(),
+    translit: document.getElementById("aTranslit").value.trim(),
+    portuguese_title: document.getElementById("aPtTitle").value.trim(),
+    translit_lyrics: document.getElementById("aLyrics").value,
+    portuguese_lyrics: document.getElementById("aPtLyrics").value,
+    video: document.getElementById("aVideo").value.trim()
+  };
+  if(!s.title){ aMsg.textContent="Please enter a title."; return; }
+  songs.push(s);
+  localStorage.setItem("songLibraryLocal", JSON.stringify(songs));
+  home();
+  ["aTitle","aTranslit","aPtTitle","aLyrics","aPtLyrics","aVideo"].forEach(id=>document.getElementById(id).value="");
+  aMsg.textContent="Song added on this device. Download songs.json and replace the GitHub file to publish it.";
+});
+document.getElementById("aDownload").addEventListener("click", () => {
+  const blob = new Blob([JSON.stringify(songs,null,2)], {type:"application/json"});
+  const url = URL.createObjectURL(blob); const a=document.createElement("a");
+  a.href=url; a.download="songs.json"; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+});
+
 fetch("./songs.json")
   .then(r => r.json())
-  .then(data => { songs = data; home(); })
+  .then(data => { songs = JSON.parse(localStorage.getItem("songLibraryLocal") || "null") || data; home(); })
   .catch(() => { app.innerHTML = '<main class="song"><div class="empty">Could not load songs.json.</div></main>'; });
 
 let deferredInstallPrompt = null;
