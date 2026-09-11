@@ -102,7 +102,7 @@ function showSong(index) {
   app.innerHTML = `
     <main class="song">
       <div class="topbar">
-        <button class="back" aria-label="Back">‹</button>
+        <button type="button" class="back" aria-label="Back to home">‹</button>
         <h1 class="heading">${escapeHtml(s.title.trim())} — ${escapeHtml(s.translit.trim())} (${escapeHtml(s.portuguese_title.trim())})</h1>
       </div>
       <section class="lyrics">
@@ -117,7 +117,7 @@ function showSong(index) {
       </section>
       ${id ? `<div class="video"><iframe src="https://www.youtube.com/embed/${encodeURIComponent(id)}" title="YouTube video" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></div>` : ""}
     </main>`;
-  app.querySelector(".back").addEventListener("click", home);
+  app.querySelector(".back").onclick = function(e) { e.preventDefault(); home(); window.scrollTo(0, 0); };
 }
 
 function escapeHtml(v) {
